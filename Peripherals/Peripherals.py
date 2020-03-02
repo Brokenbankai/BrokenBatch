@@ -19,6 +19,7 @@ class Peripherals:
         #leave the rest alone, the magic happens there
         reference = weight/knownweight
         hx.set_reference_unit(reference)
+        print(reference)
 
 #initialize the GPIO for the new driver -_- youre welcome Israel. lol. 
     def initGPIO():
