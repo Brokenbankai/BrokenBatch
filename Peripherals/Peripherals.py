@@ -17,10 +17,14 @@ class Peripherals:
         #in this line put in the reference weight
         knownweight = 1
         #leave the rest alone, the magic happens there
-        reference = weight/knownweight
-        hx.set_reference_unit(reference)
+        self.reference = weight/knownweight
+        hx.set_reference_unit(self.reference)#this line is how you set the referencce number you divide by this
         print(reference)
 
+    def conversion(self)
+        self.weight = hx.getweight()
+        self.weight = self.weight * 2.2046
+        
 #initialize the GPIO for the new driver -_- youre welcome Israel. lol. 
     def initGPIO():
         
