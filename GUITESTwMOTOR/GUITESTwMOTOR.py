@@ -2,7 +2,7 @@ from tkinter import *
 from gpiozero import PWMOutputDevice, LED, Button as GP
 import csv
 # Needs to be imported as "hx" to work later on
-import hx711 as hx #pin 38 is the data pin, pin 40 is the sclk.
+from hx711 import HX711 as hx #pin 38 is the data pin, pin 40 is the sclk.
 class Window(Frame):
     #initializes parameters
     def __init__(self, master=None):
@@ -30,7 +30,8 @@ class Window(Frame):
         self.textWeight.pack(side = RIGHT)
         self.tName= Label(self,bg= None, fg= 'Black', text = self.CName, font = ('Arial', 80), height = 2, relief = RIDGE )
         self.tName.pack(side = TOP)
-    
+        self.HX7 = HX711(dout = 20, pd_sck = 21)
+        
 
         #Buttons
         ForwardButton= Button(text= 'calibrate', command = self.selfcalibrate)  #create test button, remove and replace with GPIO button
@@ -55,7 +56,7 @@ class Window(Frame):
         self.textWeight(text = '"Weight Bared = " +str(self.CValue)')
         
     def conversion(self)
-        self.weight = hx.getweight()
+        self.weight = self.HX7.getweight()
         self.weight = self.weight * 2.2046
         
 #initialize the GPIO for the new driver -_- youre welcome Israel. lol. 
