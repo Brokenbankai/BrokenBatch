@@ -33,29 +33,16 @@ class Window(Frame):
     
 
         #Buttons
-        ForwardButton= Button(text= 'calibrate', command = self.calibrate)  #create test button, remove and replace with GPIO button
+        ForwardButton= Button(text= 'calibrate', command = self.selfcalibrate)  #create test button, remove and replace with GPIO button
         ForwardButton.pack(side=BOTTOM)
         BackButton= Button(text='Backward', command= self.Backward) #create test button, remove and replace with GPIO button
         BackButton.pack(side=BOTTOM)
         test3= Button(text='Brake', command= self.Brake) #create test button, remove and replace with GPIO button
         test3.pack(side=BOTTOM)
+        test4 = Button(text= 'Forward', command = self.Forward)
+        test4.pack(side=BOTTOM)
 
-    def init_GPIO(self):
-        #The pins that will control the Hbridge are pins 11,12,13,14. 
-        #pin 12 is meant for PWM.
-        self.pin22 = PWMOutputDevice(25)
-        self.pin22.frequency = 1000
-        self.pin22.value= 0.00
-        #Pins 11 and 13 are meant for motion. 11 goes to to topmost IO on the driver. 11 is IN 1
-        self.pin16 = LED(23)
-        self.pin14 = LED(24)
-        #pin15 is meant for the button to start. The other end connects to 3v3 at pin 17.
-        self.start= GP.Button(22)
-        self.start.pull_up = False #Active Low button, write true for Active High
-        self.start.bounce_time = 0.5  #prevents double clicking really fast
-        self.start.when_pressed = StartRead #Bad programming, i couldnt figure it out any other way : (
-    
-    def selfcalibrate(self):
+   def selfcalibrate(self):
         #we are going to use a known weight and a magic number to calibrate the load cell. no way around this.
         weight = hx.getweight()
         #in this line put in the reference weight
@@ -63,44 +50,58 @@ class Window(Frame):
         #leave the rest alone, the magic happens there
         self.reference = weight/knownweight
         hx.set_reference_unit(self.reference)#this line is how you set the referencce number you divide by this
-        self.CValue= self.reference
         print(reference)
+        self.CValue = self.reference
+        self.textWeight(text = '"Weight Bared = " +str(self.CValue)')
+        
+    def conversion(self)
+        self.weight = hx.getweight()
+        self.weight = self.weight * 2.2046
+        
+#initialize the GPIO for the new driver -_- youre welcome Israel. lol. 
+    def initGPIO():
+        
+        #these are the physical number pins corresponding to the BCM pins
+        pin3 = 2
+        pin5 = 3
+        pin7 = 4 
+        pin11= 17
+        pin21 = 9
+        #declaring pins to be outputs. LED is digital output.
+        self.R_EN = LED(pin3)
+        self.R_EN.on()
+        self.L_EN.on()
+        self.L_EN = LED(pin5)
+        self.RPWM = PWM(pin7)
+        self.LPWM = PWM(pin11)
+        #declare the buttons        
+        #the start button requires 4 pins, ground, 5 volt, ground 2, and pin 21
+        #self.Start = GP(pin21, bounce_time = self.bounce)
+        #self.Stop = GP(pin19, bounce_time= self.bounce)
 
+    #this is for the motor driver
+    #its important to turn off first so that you arent forcing the motor to burn out by trying to turn left and right.
+    def forward():
+        self.LPWM.value = self.off
+        self.RPWM.value = self.startspeed
+        
 
-#From here on, this concerns Driver Controls.
-        #Call to Move Motor Forward
-    def Forward(self):
-        self.pin22.value = 0.25
-        self.pin18.off()
-        self.pin16.on()
+    def backward():
+        self.RPWM.value = self.off
+        self.LPWM.value = self.startspeed
 
-          #Call to Move Motor Backward      
-    def Backward(self):
-        self.pin22.value = 0.25
-        self.pin16.off()
-        self.pin18.on()
+    def neutral():
+        self.RPWM.value= self.LPWM.value = 0
+        
+    def fullForward():
+        self.LPWM.value = self.off
+        self.RPWM.value = self.fullspeed
 
-        #Call for Fullspeed Forward
-    def FullForward(self):
-        Forward()
-        self.pin22.value=1
-
-        #Call for Fullspeed Backward
-    def FullBackward(self):
-        Backward()
-        self.pin22.value =1
-
-        #Call for Brake
-    def Brake(self):
-        self.pin16.off()
-        self.pin18.off()
-        self.pin22.value= 0
-
-        #Call for Neutral State
-    def Neutral(self):
-        self.pin22.value = 0
-        self.pin16.on()
-        self.pin18.on()
+    def fullBackward():
+        self.RPWM.value = self.off
+        self.LPWM.value = self.fullspeed
+       
+    #this is the automation in the program
 #From Here on, this is the stuff that concerns the buttons.
 #The bad programming starts here.
     def StartRead(self):
