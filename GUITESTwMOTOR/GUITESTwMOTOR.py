@@ -2,7 +2,7 @@ from tkinter import *
 from gpiozero import PWMOutputDevice, LED, Button as GP
 import csv
 # Needs to be imported as "hx" to work later on
-import HX711 as hx #pin 38 is the data pin, pin 40 is the sclk.
+import hx711 as hx #pin 38 is the data pin, pin 40 is the sclk.
 class Window(Frame):
     #initializes parameters
     def __init__(self, master=None):
