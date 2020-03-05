@@ -23,12 +23,7 @@ class Window(Frame):
         self.MaxCValue = 0
         self.TMaxValue = 0
         self.MaxTeamName = 'none yet'
-        #Images
-        bgImg = Image.open("Background.jpg")
-        render = ImageTk.PhotoImage(bgImg)
-        img = Label(self, image=render)
-        img.image = render
-        img.place(x=0, y=0, relwidth=1, relheight=1)
+       
         #Labels
         #separated for my own clarity, these are used to load and update the text
         self.textWeight= Label(self, bg= None, fg= 'Black', text ="Weight Bared = " +str(self.CValue), font = ('Arial', 80), height = 2, relief = RIDGE )
@@ -38,7 +33,7 @@ class Window(Frame):
     
 
         #Buttons
-        ForwardButton= Button(text= 'Forward', command = self.Forward)  #create test button, remove and replace with GPIO button
+        ForwardButton= Button(text= 'calibrate', command = self.calibrate)  #create test button, remove and replace with GPIO button
         ForwardButton.pack(side=BOTTOM)
         BackButton= Button(text='Backward', command= self.Backward) #create test button, remove and replace with GPIO button
         BackButton.pack(side=BOTTOM)
@@ -60,6 +55,16 @@ class Window(Frame):
         self.start.bounce_time = 0.5  #prevents double clicking really fast
         self.start.when_pressed = StartRead #Bad programming, i couldnt figure it out any other way : (
     
+    def selfcalibrate(self):
+        #we are going to use a known weight and a magic number to calibrate the load cell. no way around this.
+        weight = hx.getweight()
+        #in this line put in the reference weight
+        knownweight = 1
+        #leave the rest alone, the magic happens there
+        self.reference = weight/knownweight
+        hx.set_reference_unit(self.reference)#this line is how you set the referencce number you divide by this
+        self.CValue= self.reference
+        print(reference)
 
 
 #From here on, this concerns Driver Controls.
